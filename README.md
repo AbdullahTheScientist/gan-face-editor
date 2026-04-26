@@ -1,196 +1,353 @@
-# InterFaceGAN - Interpreting the Latent Space of GANs for Semantic Face Editing
+<div align="center">
 
-![Python 3.7](https://img.shields.io/badge/python-3.7-green.svg?style=plastic)
-![pytorch 1.1.0](https://img.shields.io/badge/pytorch-1.1.0-green.svg?style=plastic)
-![TensorFlow 1.12.2](https://img.shields.io/badge/tensorflow-1.12.2-green.svg?style=plastic)
-![sklearn 0.21.2](https://img.shields.io/badge/sklearn-0.21.2-green.svg?style=plastic)
+<br/>
 
-![image](./docs/assets/teaser.jpg)
-**Figure:** *High-quality facial attributes editing results with InterFaceGAN.*
-
-In this repository, we propose an approach, termed as InterFaceGAN, for semantic face editing. Specifically, InterFaceGAN is capable of turning an unconditionally trained face synthesis model to controllable GAN by interpreting the very first latent space and finding the hidden semantic subspaces.
-
-[[Paper (CVPR)](https://arxiv.org/pdf/1907.10786.pdf)]
-[[Paper (TPAMI)](https://arxiv.org/pdf/2005.09635.pdf)]
-[[Project Page](https://genforce.github.io/interfacegan/)]
-[[Demo](https://www.youtube.com/watch?v=uoftpl3Bj6w)]
-[[Colab](https://colab.research.google.com/github/genforce/interfacegan/blob/master/docs/InterFaceGAN.ipynb)]
-
-## How to Use
-
-Pick up a model, pick up a boundary, pick up a latent code, and then EDIT!
-
-```bash
-# Before running the following code, please first download
-# the pre-trained ProgressiveGAN model on CelebA-HQ dataset,
-# and then place it under the folder ".models/pretrain/".
-LATENT_CODE_NUM=10
-python edit.py \
-    -m pggan_celebahq \
-    -b boundaries/pggan_celebahq_smile_boundary.npy \
-    -n "$LATENT_CODE_NUM" \
-    -o results/pggan_celebahq_smile_editing
+```
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║    ██████╗  █████╗ ███╗   ██╗    ███████╗ █████╗  ██████╗║
+║   ██╔════╝ ██╔══██╗████╗  ██║    ██╔════╝██╔══██╗██╔════╝║
+║   ██║  ███╗███████║██╔██╗ ██║    █████╗  ███████║██║     ║
+║   ██║   ██║██╔══██║██║╚██╗██║    ██╔══╝  ██╔══██║██║     ║
+║   ╚██████╔╝██║  ██║██║ ╚████║    ██║     ██║  ██║╚██████╗║
+║    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝║
+║                                                           ║
+║              E D I T O R  ──  v 1 . 0 . 0                ║
+╚═══════════════════════════════════════════════════════════╝
 ```
 
-## GAN Models Used (Prior Work)
+**A FastAPI-powered web interface for real-time GAN facial attribute manipulation**  
+*Built on InterFaceGAN · StyleGAN · PGGAN*
 
-Before going into details, we would like to first introduce the two state-of-the-art GAN models used in this work, which are ProgressiveGAN (Karras *el al.*, ICLR 2018) and StyleGAN (Karras *et al.*, CVPR 2019). These two models achieve high-quality face synthesis by learning unconditional GANs. For more details about these two models, please refer to the original papers, as well as the official implementations.
+<br/>
 
-ProgressiveGAN:
-  [[Paper](https://arxiv.org/pdf/1710.10196.pdf)]
-  [[Code](https://github.com/tkarras/progressive_growing_of_gans)]
+[![Python](https://img.shields.io/badge/Python-3.8%2B-c8f135?style=flat-square&logo=python&logoColor=black)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-6af0d8?style=flat-square&logo=fastapi&logoColor=black)](https://fastapi.tiangolo.com)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-ff5e6c?style=flat-square&logo=pytorch&logoColor=white)](https://pytorch.org)
+[![License](https://img.shields.io/badge/License-MIT-f0b16a?style=flat-square)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Active-c8f135?style=flat-square)]()
 
-StyleGAN:
-  [[Paper](https://arxiv.org/pdf/1812.04948.pdf)]
-  [[Code](https://github.com/NVlabs/stylegan)]
+<br/>
 
-## Code Instruction
+</div>
 
-### Generative Models
+---
 
-A GAN-based generative model basically maps the latent codes (commonly sampled from high-dimensional latent space, such as standart normal distribution) to photo-realistic images. Accordingly, a base class for generator, called `BaseGenerator`, is defined in `models/base_generator.py`. Basically, it should contains following member functions:
+## ✦ Overview
 
-- `build()`: Build a pytorch module.
-- `load()`: Load pre-trained weights.
-- `convert_tf_model()` (Optional): Convert pre-trained weights from tensorflow model.
-- `sample()`: Randomly sample latent codes. This function should specify what kind of distribution the latent code is subject to.
-- `preprocess()`: Function to preprocess the latent codes before feeding it into the generator.
-- `synthesize()`: Run the model to get synthesized results (or any other intermediate outputs).
-- `postprocess()`: Function to postprocess the outputs from generator to convert them to images.
+**GAN Face Editor** is a full-stack web application that exposes the power of [InterFaceGAN](https://github.com/genforce/interfacegan) through a sleek browser UI. Load a pre-trained GAN, sample random face images, then push and pull facial attributes — age, gender, smile, pose, eyeglasses — in real-time using intuitive sliders.
 
-We have already provided following models in this repository:
-
-- ProgressiveGAN:
-  - A clone of official tensorflow implementation: `models/pggan_tf_official/`. This clone is only used for converting tensorflow pre-trained weights to pytorch ones. This conversion will be done automitally when the model is used for the first time. After that, tensorflow version is not used anymore.
-  - Pytorch implementation of official model (just for inference): `models/pggan_generator_model.py`.
-  - Generator class derived from `BaseGenerator`: `models/pggan_generator.py`.
-  - Please download the official released model trained on CelebA-HQ dataset and place it in folder `models/pretrain/`.
-- StyleGAN:
-  - A clone of official tensorflow implementation: `models/stylegan_tf_official/`. This clone is only used for converting tensorflow pre-trained weights to pytorch ones. This conversion will be done automitally when the model is used for the first time. After that, tensorflow version is not used anymore.
-  - Pytorch implementation of official model (just for inference): `models/stylegan_generator_model.py`.
-  - Generator class derived from `BaseGenerator`: `models/stylegan_generator.py`.
-  - Please download the official released models trained on CelebA-HQ dataset and FF-HQ dataset and place them in folder `models/pretrain/`.
-  - Support synthesizing images from $\mathcal{Z}$ space, $\mathcal{W}$ space, and extended $\mathcal{W}$ space (18x512).
-  - Set truncation trick and noise randomization trick in `models/model_settings.py`. Among them, `STYLEGAN_RANDOMIZE_NOISE` is highly recommended to set as `False`. `STYLEGAN_TRUNCATION_PSI = 0.7` and `STYLEGAN_TRUNCATION_LAYERS = 8` are inherited from official implementation. Users can customize their own models. NOTE: These three settings will NOT affect the pre-trained weights.
-- Customized model:
-  - Users can do experiments with their own models by easily deriving new class from `BaseGenerator`.
-  - Before used, new model should be first registered in `MODEL_POOL` in file `models/model_settings.py`.
-
-### Utility Functions
-
-We provide following utility functions in `utils/manipulator.py` to make InterFaceGAN much easier to use.
-
-- `train_boundary()`: This function can be used for boundary searching. It takes pre-prepared latent codes and the corresponding attributes scores as inputs, and then outputs the normal direction of the separation boundary. Basically, this goal is achieved by training a linear SVM. The returned vector can be further used for semantic face editing.
-- `project_boundary()`: This function can be used for conditional manipulation. It takes a primal direction and other conditional directions as inputs, and then outputs a new normalized direction. Moving latent code along this new direction will manipulate the primal attribute yet barely affect the conditioned attributes. NOTE: For now, at most two conditions are supported.
-- `linear_interpolate()`: This function can be used for semantic face editing. It takes a latent code and the normal direction of a particular semantic boundary as inputs, and then outputs a collection of manipulated latent codes with linear interpolation. These interpolation can be used to see how the synthesis will vary if moving the latent code along the given direction.
-
-### Tools
-
-- `generate_data.py`: This script can be used for data preparation. It will generate a collection of syntheses (images are saved for further attribute prediction) as well as save the input latent codes.
-
-- `train_boundary.py`: This script can be used for boundary searching.
-
-- `edit.py`: This script can be usd for semantic face editing.
-
-## Usage
-
-We take ProgressiveGAN model trained on CelebA-HQ dataset as an instance.
-
-### Prepare data
-
-```bash
-NUM=10000
-python generate_data.py -m pggan_celebahq -o data/pggan_celebahq -n "$NUM"
+```
+Browser UI  ──►  FastAPI Backend  ──►  GAN Generator  ──►  Boundary Vectors
+    ▲                                                              │
+    └─────────────── Base64 PNG ◄────────────────────────────────┘
 ```
 
-### Predict Attribute Score
+> **No Jupyter. No Google Colab.** Just a clean web UI you can run anywhere.
 
-Get your own predictor for attribute `$ATTRIBUTE_NAME`, evaluate on all generated images, and save the inference results as `data/pggan_celebahq/"$ATTRIBUTE_NAME"_scores.npy`. NOTE: The save results should be with shape `($NUM, 1)`.
+---
 
-### Search Semantic Boundary
+## ✦ Features
 
-```bash
-python train_boundary.py \
-    -o boundaries/pggan_celebahq_"$ATTRIBUTE_NAME" \
-    -c data/pggan_celebahq/z.npy \
-    -s data/pggan_celebahq/"$ATTRIBUTE_NAME"_scores.npy
+| Feature | Description |
+|---|---|
+| 🧠 **Multi-model Support** | Switch between `stylegan_ffhq`, `stylegan_celebahq`, and `pggan_celebahq` |
+| 🔀 **W / Z Latent Space** | Toggle between Z-space and disentangled W-space for StyleGAN |
+| 🎲 **Seeded Sampling** | Reproducible face generation with a numeric seed (0–1000) |
+| 🖼️ **Batch Synthesis** | Generate 1–8 faces side-by-side in a single pass |
+| 🎛️ **5 Attribute Sliders** | Age · Eyeglasses · Gender · Pose · Smile (range: −3.0 → +3.0) |
+| ⚡ **Auto-apply on Release** | Edits fire automatically when you release a slider |
+| 📐 **Configurable Viz Size** | Choose output resolution from 64 px to 512 px |
+| 📋 **Live Activity Log** | Timestamped log of every API call and result |
+| 🌐 **Zero-reload Architecture** | Everything happens over REST — no page refreshes |
+
+---
+
+## ✦ Project Structure
+
+```
+gan-face-editor/
+│
+├── main.py                   ← FastAPI application (all endpoints)
+├── index.html                ← Single-file frontend (HTML + CSS + JS)
+├── requirements.txt          ← Python dependencies
+│
+├── models/
+│   ├── model_settings.py     ← MODEL_POOL registry
+│   ├── pggan_generator.py    ← PGGAN wrapper
+│   └── stylegan_generator.py ← StyleGAN wrapper
+│
+├── boundaries/               ← Pre-trained attribute boundary vectors (.npy)
+│   ├── stylegan_ffhq_age_w_boundary.npy
+│   ├── stylegan_ffhq_eyeglasses_w_boundary.npy
+│   ├── stylegan_ffhq_gender_w_boundary.npy
+│   ├── stylegan_ffhq_pose_w_boundary.npy
+│   ├── stylegan_ffhq_smile_w_boundary.npy
+│   └── ...                   ← (same pattern for other models / Z-space)
+│
+└── utils/
+    └── manipulator.py        ← linear_interpolate utility
 ```
 
-### Compute Conditional Boundary (Optional)
+---
 
-This step is optional. It depends on whether conditional manipulation is needed. Users can use function `project_boundary()` in file `utils/manipulator.py` to compute the projected direction.
+## ✦ Installation
 
-## Boundaries Description
+### 1 · Clone the repository
 
-We provided following boundaries in folder `boundaries/`. The boundaries can be more accurate if stronger attribute predictor is used.
+```bash
+git clone https://github.com/your-username/gan-face-editor.git
+cd gan-face-editor
+```
 
-- ProgressiveGAN model trained on CelebA-HQ dataset:
-  - Single boundary:
-    - `pggan_celebahq_pose_boundary.npy`: Pose.
-    - `pggan_celebahq_smile_boundary.npy`: Smile (expression).
-    - `pggan_celebahq_age_boundary.npy`: Age.
-    - `pggan_celebahq_gender_boundary.npy`: Gender.
-    - `pggan_celebahq_eyeglasses_boundary.npy`: Eyeglasses.
-    - `pggan_celebahq_quality_boundary.npy`: Image quality.
-  - Conditional boundary:
-    - `pggan_celebahq_age_c_gender_boundary.npy`: Age (conditioned on gender).
-    - `pggan_celebahq_age_c_eyeglasses_boundary.npy`: Age (conditioned on eyeglasses).
-    - `pggan_celebahq_age_c_gender_eyeglasses_boundary.npy`: Age (conditioned on gender and eyeglasses).
-    - `pggan_celebahq_gender_c_age_boundary.npy`: Gender (conditioned on age).
-    - `pggan_celebahq_gender_c_eyeglasses_boundary.npy`: Gender (conditioned on eyeglasses).
-    - `pggan_celebahq_gender_c_age_eyeglasses_boundary.npy`: Gender (conditioned on age and eyeglasses).
-    - `pggan_celebahq_eyeglasses_c_age_boundary.npy`: Eyeglasses (conditioned on age).
-    - `pggan_celebahq_eyeglasses_c_gender_boundary.npy`: Eyeglasses (conditioned on gender).
-    - `pggan_celebahq_eyeglasses_c_age_gender_boundary.npy`: Eyeglasses (conditioned on age and gender).
-- StyleGAN model trained on CelebA-HQ dataset:
-  - Single boundary in $\mathcal{Z}$ space:
-    - `stylegan_celebahq_pose_boundary.npy`: Pose.
-    - `stylegan_celebahq_smile_boundary.npy`: Smile (expression).
-    - `stylegan_celebahq_age_boundary.npy`: Age.
-    - `stylegan_celebahq_gender_boundary.npy`: Gender.
-    - `stylegan_celebahq_eyeglasses_boundary.npy`: Eyeglasses.
-  - Single boundary in $\mathcal{W}$ space:
-    - `stylegan_celebahq_pose_w_boundary.npy`: Pose.
-    - `stylegan_celebahq_smile_w_boundary.npy`: Smile (expression).
-    - `stylegan_celebahq_age_w_boundary.npy`: Age.
-    - `stylegan_celebahq_gender_w_boundary.npy`: Gender.
-    - `stylegan_celebahq_eyeglasses_w_boundary.npy`: Eyeglasses.
+### 2 · Create a virtual environment *(recommended)*
 
-- StyleGAN model trained on FF-HQ dataset:
-  - Single boundary in $\mathcal{Z}$ space:
-    - `stylegan_ffhq_pose_boundary.npy`: Pose.
-    - `stylegan_ffhq_smile_boundary.npy`: Smile (expression).
-    - `stylegan_ffhq_age_boundary.npy`: Age.
-    - `stylegan_ffhq_gender_boundary.npy`: Gender.
-    - `stylegan_ffhq_eyeglasses_boundary.npy`: Eyeglasses.
-  - Conditional boundary in $\mathcal{Z}$ space:
-    - `stylegan_ffhq_age_c_gender_boundary.npy`: Age (conditioned on gender).
-    - `stylegan_ffhq_age_c_eyeglasses_boundary.npy`: Age (conditioned on eyeglasses).
-    - `stylegan_ffhq_eyeglasses_c_age_boundary.npy`: Eyeglasses (conditioned on age).
-    - `stylegan_ffhq_eyeglasses_c_gender_boundary.npy`: Eyeglasses (conditioned on gender).
-  - Single boundary in $\mathcal{W}$ space:
-    - `stylegan_ffhq_pose_w_boundary.npy`: Pose.
-    - `stylegan_ffhq_smile_w_boundary.npy`: Smile (expression).
-    - `stylegan_ffhq_age_w_boundary.npy`: Age.
-    - `stylegan_ffhq_gender_w_boundary.npy`: Gender.
-    - `stylegan_ffhq_eyeglasses_w_boundary.npy`: Eyeglasses.
+```bash
+python -m venv .venv
+source .venv/bin/activate        # Linux / macOS
+.venv\Scripts\activate           # Windows
+```
 
-## BibTeX
+### 3 · Install dependencies
 
-```bibtex
-@inproceedings{shen2020interpreting,
-  title     = {Interpreting the Latent Space of GANs for Semantic Face Editing},
-  author    = {Shen, Yujun and Gu, Jinjin and Tang, Xiaoou and Zhou, Bolei},
-  booktitle = {CVPR},
-  year      = {2020}
+```bash
+pip install -r requirements.txt
+```
+
+<details>
+<summary><b>requirements.txt contents</b></summary>
+
+```
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+python-multipart
+numpy
+opencv-python-headless
+Pillow
+torch
+```
+
+</details>
+
+### 4 · Download pre-trained models & boundaries
+
+Follow the [InterFaceGAN instructions](https://github.com/genforce/interfacegan#pretrained-models) to download:
+
+- Pre-trained GAN weights → place in `models/pretrain/`
+- Boundary vectors → place in `boundaries/`
+
+---
+
+## ✦ Running the App
+
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Then open your browser at:
+
+```
+http://localhost:8000
+```
+
+> The root `/` route serves `index.html` automatically. You can also open `index.html` directly as a local file and point the **API Endpoint** field at any running server.
+
+---
+
+## ✦ API Reference
+
+All endpoints accept and return JSON. Base URL: `http://localhost:8000`
+
+### `GET /status`
+Returns current server state.
+
+```json
+{
+  "model_loaded": true,
+  "model_name": "stylegan_ffhq",
+  "latent_space_type": "W",
+  "has_samples": true
 }
 ```
 
-```bibtex
-@article{shen2020interfacegan,
-  title   = {InterFaceGAN: Interpreting the Disentangled Face Representation Learned by GANs},
-  author  = {Shen, Yujun and Yang, Ceyuan and Tang, Xiaoou and Zhou, Bolei},
-  journal = {TPAMI},
-  year    = {2020}
+---
+
+### `GET /models`
+Lists all available models and latent space options.
+
+```json
+{
+  "models": ["pggan_celebahq", "stylegan_celebahq", "stylegan_ffhq"],
+  "latent_space_types": ["Z", "W"]
 }
 ```
+
+---
+
+### `POST /load_model`
+Loads a GAN model and its boundary vectors into memory.
+
+**Request body:**
+```json
+{
+  "model_name": "stylegan_ffhq",
+  "latent_space_type": "W"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "model": "stylegan_ffhq",
+  "latent_space": "W"
+}
+```
+
+---
+
+### `POST /sample`
+Samples random latent codes and synthesizes face images.
+
+**Request body:**
+```json
+{
+  "num_samples": 4,
+  "noise_seed": 42
+}
+```
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "image": "<base64-encoded PNG>",
+  "num_samples": 4
+}
+```
+
+---
+
+### `POST /edit`
+Applies attribute offsets to the cached latent codes and returns edited faces.
+
+**Request body:**
+```json
+{
+  "age":        1.5,
+  "eyeglasses": 0.0,
+  "gender":    -1.0,
+  "pose":       0.5,
+  "smile":      2.0,
+  "viz_size":   256
+}
+```
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "image": "<base64-encoded PNG>"
+}
+```
+
+> All attribute values are clamped to **[−3.0, +3.0]**. `viz_size` must be between **64** and **512**.
+
+---
+
+## ✦ Workflow
+
+```
+1. Open the UI  →  2. Set API URL  →  3. Load Model
+       ↓
+4. Set num_samples + seed  →  5. Generate Samples
+       ↓
+6. Adjust attribute sliders  →  7. View edited faces side-by-side
+       ↓
+8. Change seed / model / latent space  →  repeat
+```
+
+---
+
+## ✦ Supported Models
+
+| Model | GAN Type | Resolution | Notes |
+|---|---|---|---|
+| `stylegan_ffhq` | StyleGAN | 1024 × 1024 | FFHQ dataset · best quality |
+| `stylegan_celebahq` | StyleGAN | 1024 × 1024 | CelebA-HQ dataset |
+| `pggan_celebahq` | PGGAN | 1024 × 1024 | CelebA-HQ dataset · Z-space only |
+
+> W-space manipulation is only available for StyleGAN models. PGGAN automatically falls back to Z-space.
+
+---
+
+## ✦ Attribute Ranges
+
+| Attribute | Min | Max | Effect at +3 | Effect at −3 |
+|---|---|---|---|---|
+| `age` | −3.0 | +3.0 | Older | Younger |
+| `eyeglasses` | −3.0 | +3.0 | With glasses | Without glasses |
+| `gender` | −3.0 | +3.0 | More masculine | More feminine |
+| `pose` | −3.0 | +3.0 | Turned right | Turned left |
+| `smile` | −3.0 | +3.0 | Smiling | Neutral / frowning |
+
+---
+
+## ✦ Troubleshooting
+
+**`Model not loaded` error**  
+→ Make sure you've clicked **Load Model** before sampling or editing.
+
+**`No latent codes` error**  
+→ Click **Generate Samples** before applying edits.
+
+**Boundary `.npy` file not found**  
+→ Confirm your `boundaries/` directory contains the correct files for the selected model and latent space type. W-space files end in `_w_boundary.npy`.
+
+**CORS error in browser**  
+→ The FastAPI backend has CORS enabled for all origins by default. If you're behind a reverse proxy, ensure it forwards the `Origin` header.
+
+**Slow inference**  
+→ Enable GPU support by ensuring PyTorch detects CUDA: `python -c "import torch; print(torch.cuda.is_available())"`. The generators automatically use the available device.
+
+---
+
+## ✦ Tech Stack
+
+```
+Backend          Frontend
+────────         ────────
+FastAPI          Vanilla HTML / CSS / JS
+Uvicorn          Syne + DM Mono (Google Fonts)
+PyTorch          CSS custom properties
+NumPy            Fetch API (no framework)
+OpenCV           Base64 image rendering
+Pillow
+```
+
+---
+
+## ✦ Credits & References
+
+- **InterFaceGAN** — [Shen et al., CVPR 2020](https://arxiv.org/abs/1907.10786) · [GitHub](https://github.com/genforce/interfacegan)
+- **StyleGAN** — [Karras et al., CVPR 2019](https://arxiv.org/abs/1812.04948)
+- **PGGAN** — [Karras et al., ICLR 2018](https://arxiv.org/abs/1710.10196)
+- **FFHQ Dataset** — [Flickr-Faces-HQ](https://github.com/NVlabs/ffhq-dataset)
+- **CelebA-HQ Dataset** — [Liu et al.](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html)
+
+---
+
+## ✦ License
+
+```
+MIT License — free to use, modify, and distribute.
+See LICENSE for full terms.
+```
+
+---
+
+<div align="center">
+
+*Built with ♥ using FastAPI + InterFaceGAN*
+
+</div>
