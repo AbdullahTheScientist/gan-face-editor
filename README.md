@@ -141,7 +141,7 @@ Follow the [InterFaceGAN instructions](https://github.com/genforce/interfacegan#
 ## ✦ Running the App
 
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Then open your browser at:
