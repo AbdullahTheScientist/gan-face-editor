@@ -15,6 +15,9 @@
 ║              E D I T O R  ──  v 1 . 0 . 0                ║
 ╚═══════════════════════════════════════════════════════════╝
 ```
+<br/>
+</div>
+
 ## 🎥 Click below to Watch Demo
 
 <div align="center">
@@ -25,7 +28,7 @@
 **A FastAPI-powered web interface for real-time GAN facial attribute manipulation**  
 *Built on InterFaceGAN · StyleGAN · PGGAN*
 
-<br/>
+
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-c8f135?style=flat-square&logo=python&logoColor=black)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-6af0d8?style=flat-square&logo=fastapi&logoColor=black)](https://fastapi.tiangolo.com)
