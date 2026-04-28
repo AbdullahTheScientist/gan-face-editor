@@ -15,7 +15,13 @@
 ║              E D I T O R  ──  v 1 . 0 . 0                ║
 ╚═══════════════════════════════════════════════════════════╝
 ```
+## 🎥 Click below to Watch Demo
 
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=fXN4hCyXGgQ">
+    <img src="https://img.youtube.com/vi/fXN4hCyXGgQ/0.jpg" width="600"/>
+  </a>
+</div>
 **A FastAPI-powered web interface for real-time GAN facial attribute manipulation**  
 *Built on InterFaceGAN · StyleGAN · PGGAN*
 
